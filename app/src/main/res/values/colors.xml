@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base colors -->
+    <color name="blue_base">#FF5977F7</color>
+    <color name="blue_10_opacity">#1A5977F7</color>
+
+    <color name="white_base">#FFFFFFFF</color>
+    <color name="white_10_opacity">#1AFFFFFF</color>
+
+    <!-- Surface/Background/State Colors -->
+    <color name="on_surface">#FF1B1B1C</color>
+    <color name="on_surface_12">#1F1B1B1C</color>
+    <color name="on_surface_variant">#FF535364</color>
+    <color name="surface">#FFEFEFF2</color>
+    <color name="surface_lowest">#FFFFFFFF</color>
+
+    <!-- Error -->
+    <color name="error">#FFE1294B</color>
+</resources>
