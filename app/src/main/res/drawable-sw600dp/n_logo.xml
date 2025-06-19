@@ -1,17 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="120dp"
-    android:height="120dp"
-    android:viewportWidth="300"
-    android:viewportHeight="300">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="400"
+    android:viewportHeight="400"
+    tools:ignore="MissingDefaultResource">
     <group
         android:name="animationGroup"
-        android:pivotX="150"
-        android:pivotY="150">
+        android:pivotX="200"
+        android:pivotY="200">
         <group
-            android:translateX="108"
-            android:translateY="94.5"
-            android:scaleX="0.8"
-            android:scaleY="0.8">
+            android:translateX="158"
+            android:translateY="144.5"
+            android:scaleX="1.1"
+            android:scaleY="1.1">
             <path
                 android:fillColor="#ffffff"
                 android:pathData="M0,110.14V0.06H36.17L62.12,97.41H64.64V0.06H83.35V110.14H47.34L21.39,12.79H18.71V40.24V45.01V62.4V70.83V90.23V110.14H0Z" />

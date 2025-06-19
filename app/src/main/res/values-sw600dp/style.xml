@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.NoteMarkApp" parent="android:Theme.Material.Light.NoActionBar" />
-
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/blue_base</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/animated_logo</item>
-        <item name="splashScreenIconSize">240dp</item>
+        <item name="splashScreenIconSize">220dp</item>
         <item name="postSplashScreenTheme">@style/Theme.NoteMarkApp</item>
     </style>
 </resources>
