@@ -13,3 +13,16 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Multi-module build artifacts
+*/build/
+**/intermediates/
+**/tmp/
+**/outputs/
+
+# Additional Android artifacts
+*.apk
+*.aab
+lint-results*
+*.hprof
+

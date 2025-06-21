@@ -20,5 +20,10 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "NoteMarkApp"
+
 include(":app")
- 
+include(":core:common")
+include(":core:design")
+include(":core:network")
+include(":core:database")
+include(":feature:auth")
