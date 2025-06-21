@@ -1,67 +1,43 @@
 package gr.pkcoding.notemarkapp
 
-import android.animation.ObjectAnimator
 import android.os.Bundle
-import android.view.View
-import android.view.animation.OvershootInterpolator
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.animation.doOnEnd
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import dagger.hilt.android.AndroidEntryPoint
 import gr.pkcoding.notemarkapp.ui.theme.NoteMarkAppTheme
+import io.ktor.client.HttpClient
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel = MainViewModel()
+    @Inject
+    lateinit var httpClient: HttpClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen().apply {
-            setKeepOnScreenCondition {
-                !viewModel.ready.value
-            }
-            setOnExitAnimationListener { screen ->
-                val zoomX = ObjectAnimator.ofFloat(
-                    screen.iconView,
-                    View.SCALE_X,
-                    0.4f,
-                    0.0f
-                )
-                zoomX.interpolator = OvershootInterpolator()
-                zoomX.duration = 500L
-                zoomX.doOnEnd { screen.remove() }
 
-                val zoomY = ObjectAnimator.ofFloat(
-                    screen.iconView,
-                    View.SCALE_Y,
-                    0.4f,
-                    0.0f
-                )
-                zoomY.interpolator = OvershootInterpolator()
-                zoomY.duration = 500L
-                zoomY.doOnEnd { screen.remove() }
+        // NO SPLASH SCREEN FOR NOW - we'll fix it later
+        // The issue is in the splash_screen_view layout XML
 
-                zoomX.start()
-                zoomY.start()
-            }
-        }
+        Log.d("MainActivity", "HttpClient injected: ${httpClient.javaClass.simpleName}")
+        Log.d("MainActivity", "Hilt setup working perfectly! 🚀")
+
         setContent {
             NoteMarkAppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Greeting("NoteMark with Hilt! 🚀\n\nNetwork module ready!\nReady for Authentication!")
                 }
             }
         }
