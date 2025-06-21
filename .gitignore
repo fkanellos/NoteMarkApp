@@ -26,3 +26,22 @@ local.properties
 lint-results*
 *.hprof
 
+# KSP and build caches
+**/kspCaches/
+**/generated/
+**/transforms/
+*.bin
+*.dex
+
+# Gradle build files
+**/classpath-entries.bin
+**/classpath-structure.bin
+**/sealed
+**/sourceToOutputs
+**/symbols
+
+# IDE files at root level
+*.xml
+!gradle/wrapper/gradle-wrapper.xml
+!app/src/main/AndroidManifest.xml
+!*/src/main/AndroidManifest.xml
