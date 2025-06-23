@@ -1,5 +1,9 @@
 package gr.pkcoding.notemarkapp.feature.auth.domain.model
 
+import gr.pkcoding.notemarkapp.core.network.model.ApiResult
+import gr.pkcoding.notemarkapp.core.network.model.AuthResponse
+import gr.pkcoding.notemarkapp.core.network.storage.AuthTokens
+
 /**
  * Domain User model - represents authenticated user in the app
  * This is what the UI layer works with (not the API response models)
@@ -85,32 +89,32 @@ data class RegistrationData(
  */
 
 // Convert API models to Domain models
-fun gr.pkcoding.notemarkapp.core.network.model.AuthResponse.toUser(): User {
-    // Note: API doesn't return user info, so we create a minimal user
-    // In real apps, you'd have a separate getUserProfile() API call
+fun AuthResponse.toUser(): User {
+    // TODO: In a real app, make API call to get user profile after login
+    // For now, return a temporary user since we have valid tokens
     return User(
-        id = null, // Will be populated from getUserProfile() later
-        username = "", // Will be populated from getUserProfile() later  
-        email = "" // Will be populated from getUserProfile() later
+        id = "temp_user_id", // Will be populated from getUserProfile() API later
+        username = "Current User", // Will be populated from getUserProfile() API later
+        email = "user@example.com" // Will be populated from getUserProfile() API later
     )
 }
 
-fun gr.pkcoding.notemarkapp.core.network.model.AuthResponse.toTokens(): gr.pkcoding.notemarkapp.core.network.storage.AuthTokens {
-    return gr.pkcoding.notemarkapp.core.network.storage.AuthTokens(
+fun AuthResponse.toTokens(): AuthTokens {
+    return AuthTokens(
         accessToken = accessToken,
         refreshToken = refreshToken
     )
 }
 
 // Convert API errors to Domain errors
-fun gr.pkcoding.notemarkapp.core.network.model.ApiResult.Error.toDomainError(): AuthResult.Error {
+fun ApiResult.Error.toDomainError(): AuthResult.Error {
     return AuthResult.Error(
         message = exception.message ?: "Unknown error occurred",
         cause = exception
     )
 }
 
-fun gr.pkcoding.notemarkapp.core.network.model.ApiResult.HttpError.toDomainError(): AuthResult<Nothing> {
+fun ApiResult.HttpError.toDomainError(): AuthResult<Nothing> {
     return when (code) {
         401 -> AuthResult.Error("Invalid login credentials")
         409 -> AuthResult.Error("Email already exists")

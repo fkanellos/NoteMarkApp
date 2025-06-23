@@ -54,6 +54,7 @@ class AuthRepositoryImpl @Inject constructor(
                 tokenStorage.saveTokens(result.data.toTokens())
 
                 // 4. Convert to domain model and return
+                // Note: toUser() currently returns mock data - will be improved with user profile API
                 AuthResult.Success(result.data.toUser())
             }
             is ApiResult.Error -> result.toDomainError()
@@ -76,15 +77,16 @@ class AuthRepositoryImpl @Inject constructor(
             val tokens = tokenStorage.getTokens()
             if (tokens != null) {
                 // TODO: In a real app, make API call to get user profile
-                // For now, return a placeholder user since we have valid tokens
+                // For now, return a mock user since we have valid tokens
                 AuthResult.Success(
                     User(
-                        id = "current_user",
-                        username = "User",
+                        id = "current_user_id",
+                        username = "Current User",
                         email = "user@example.com"
                     )
                 )
             } else {
+                // No tokens = not logged in
                 AuthResult.Success(null)
             }
         } catch (e: Exception) {
