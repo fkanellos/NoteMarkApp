@@ -23,6 +23,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import gr.pkcoding.notemarkapp.features.auth.ui.landing.LandingScreen
 import gr.pkcoding.notemarkapp.features.auth.ui.login.LoginScreen
+import gr.pkcoding.notemarkapp.ui.components.RegisterScreen
 
 /**
  * Main navigation graph for the NoteMark app using Navigation 3.0
@@ -101,17 +102,17 @@ fun NoteMarkNavigationGraph(
                 )
             }
 
-            // Login Screen
-            composable<LoginRoute> { backStackEntry ->
-                val loginRoute = backStackEntry.toRoute<LoginRoute>()
+            composable<RegisterRoute> { backStackEntry ->
+                val registerRoute = backStackEntry.toRoute<RegisterRoute>()
 
-                LoginScreen(
-                    onLoginClick = { email, password ->
-                        // TODO: Handle API login call
+                RegisterScreen(
+                    onRegisterClick = { username, email, password, confirmPassword ->
+                        // TODO: Call AuthViewModel για registration
+                        // For now, navigate to main (placeholder)
                         navController.navigateToMain(clearAuthStack = true)
                     },
-                    onSignUpClick = {
-                        navController.switchToRegister()
+                    onSignInClick = {
+                        navController.switchToLogin()
                     },
                     onBackClick = {
                         navController.navigateBackOrToLanding()
@@ -119,19 +120,20 @@ fun NoteMarkNavigationGraph(
                 )
             }
 
-            // Register Screen
-            composable<RegisterRoute> { backStackEntry ->
-                val registerRoute = backStackEntry.toRoute<RegisterRoute>()
+// Update το existing login composable να χρησιμοποιεί το actual LoginScreen:
+            composable<LoginRoute> { backStackEntry ->
+                val loginRoute = backStackEntry.toRoute<LoginRoute>()
 
-                RegisterScreenPlaceholder(
-                    fromLogin = registerRoute.fromLogin,
-                    onNavigateToLogin = { email ->
-                        navController.switchToLogin(prefillEmail = email)
-                    },
-                    onNavigateToMain = {
+                LoginScreen(
+                    onLoginClick = { email, password ->
+                        // TODO: Call AuthViewModel για authentication
+                        // For now, navigate to main (placeholder)
                         navController.navigateToMain(clearAuthStack = true)
                     },
-                    onNavigateBack = {
+                    onSignUpClick = {
+                        navController.switchToRegister()
+                    },
+                    onBackClick = {
                         navController.navigateBackOrToLanding()
                     }
                 )

@@ -12,6 +12,7 @@ import androidx.navigation.NavOptionsBuilder
 
 /**
  * Navigate to login screen with optional parameters
+ * Implements milestone requirement for proper back stack management
  */
 fun NavController.navigateToLogin(
     fromRegister: Boolean = false,
@@ -22,13 +23,14 @@ fun NavController.navigateToLogin(
         if (clearBackStack) {
             popUpTo(0) { inclusive = true }
         }
-        // Avoid multiple copies of login screen
+        // DON'T remove landing - keep it in back stack for proper back navigation
         launchSingleTop = true
     }
 }
 
 /**
  * Navigate to register screen with optional parameters
+ * Implements milestone requirement for proper back stack management
  */
 fun NavController.navigateToRegister(
     fromLogin: Boolean = false,
@@ -38,7 +40,7 @@ fun NavController.navigateToRegister(
         if (clearBackStack) {
             popUpTo(0) { inclusive = true }
         }
-        // Avoid multiple copies of register screen
+        // DON'T remove landing - keep it in back stack for proper back navigation
         launchSingleTop = true
     }
 }
@@ -91,19 +93,27 @@ fun NavController.handleLogout() {
 
 /**
  * Navigate back with fallback to landing if no back stack
+ * This ensures users never get stuck and always have a way back to landing
  */
 fun NavController.navigateBackOrToLanding() {
     if (!popBackStack()) {
-        navigateToLanding(clearBackStack = true)
+        // If no back stack, go to landing screen instead of closing app
+        navigate(LandingRoute) {
+            popUpTo(0) { inclusive = true }
+            launchSingleTop = true
+        }
     }
 }
 
 /**
  * Switch between login and register screens (maintains single instance)
+ * Implements milestone requirement: "Only one instance should be on back stack"
+ * This prevents endless back stack growth when users keep switching between login/register
  */
 fun NavController.switchToLogin(prefillEmail: String? = null) {
     navigate(LoginRoute(fromRegister = true, prefillEmail = prefillEmail)) {
-        // Remove register screen from back stack
+        // Remove register screen from back stack to prevent endless growth
+        // But keep Landing in back stack so back button works properly
         popUpTo<RegisterRoute> { inclusive = true }
         launchSingleTop = true
     }
@@ -111,10 +121,13 @@ fun NavController.switchToLogin(prefillEmail: String? = null) {
 
 /**
  * Switch between register and login screens (maintains single instance)
+ * Implements milestone requirement: "Only one instance should be on back stack"
+ * This prevents endless back stack growth when users keep switching between login/register
  */
 fun NavController.switchToRegister() {
     navigate(RegisterRoute(fromLogin = true)) {
-        // Remove login screen from back stack
+        // Remove login screen from back stack to prevent endless growth
+        // But keep Landing in back stack so back button works properly
         popUpTo<LoginRoute> { inclusive = true }
         launchSingleTop = true
     }
