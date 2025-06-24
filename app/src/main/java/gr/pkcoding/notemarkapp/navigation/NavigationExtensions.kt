@@ -70,18 +70,6 @@ fun NavController.navigateToLanding(clearBackStack: Boolean = false) {
 }
 
 /**
- * Navigate to splash screen (typically used for restart scenarios)
- */
-fun NavController.navigateToSplash(clearBackStack: Boolean = true) {
-    navigate(SplashRoute) {
-        if (clearBackStack) {
-            popUpTo(0) { inclusive = true }
-        }
-        launchSingleTop = true
-    }
-}
-
-/**
  * Navigate to profile screen
  */
 fun NavController.navigateToProfile(userId: String? = null) {
@@ -149,16 +137,6 @@ fun NavController.handleAuthSuccess(isNewUser: Boolean) {
 fun NavController.handleSessionExpired() {
     navigate(LandingRoute) {
         // Clear everything and start fresh
-        popUpTo(0) { inclusive = true }
-        launchSingleTop = true
-    }
-}
-
-/**
- * Restart app flow (useful for error recovery)
- */
-fun NavController.restartApp() {
-    navigate(SplashRoute) {
         popUpTo(0) { inclusive = true }
         launchSingleTop = true
     }

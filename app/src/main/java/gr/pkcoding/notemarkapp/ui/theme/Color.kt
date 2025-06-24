@@ -8,6 +8,7 @@ val Pink80 = Color(0xFFEFB8C8)
 
 val BlueBase = Color(0xFF5977F7)
 val Blue10Opacity = Color(0x1A5977F7)
+val LightBlue = Color(0xFFE0EAFF)
 
 val WhiteBase = Color(0xFFFFFFFF)
 val White10Opacity = Color(0x1AFFFFFF)

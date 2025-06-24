@@ -3,6 +3,7 @@ package gr.pkcoding.notemarkapp.adaptive
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.TextUnit
+import gr.pkcoding.notemarkapp.ui.adaptive.adaptiveValue
 
 @Immutable
 data class AdaptiveTextUnit(

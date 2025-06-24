@@ -21,6 +21,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
+import gr.pkcoding.notemarkapp.features.auth.ui.landing.LandingScreen
+import gr.pkcoding.notemarkapp.features.auth.ui.login.LoginScreen
 
 /**
  * Main navigation graph for the NoteMark app using Navigation 3.0
@@ -40,39 +42,39 @@ import androidx.navigation.toRoute
  * @param modifier Modifier for the NavHost
  * @param startDestination Starting destination (usually LandingRoute or HomeRoute based on auth)
  */
+
 @Composable
 fun NoteMarkNavigationGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: Any = LandingRoute // Will be determined by MainActivity based on auth status
+    startDestination: Any = AuthGraph
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
-        // Global enter/exit animations
         enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS)
+                animationSpec = tween(300)
             )
         },
         exitTransition = {
             slideOutOfContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS)
+                animationSpec = tween(300)
             )
         },
         popEnterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS)
+                animationSpec = tween(300)
             )
         },
         popExitTransition = {
             slideOutOfContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS)
+                animationSpec = tween(300)
             )
         }
     ) {
@@ -80,23 +82,21 @@ fun NoteMarkNavigationGraph(
         navigation<AuthGraph>(
             startDestination = LandingRoute
         ) {
-            // Landing Screen - Welcome/Onboarding (First screen after native splash)
+            // Landing Screen
             composable<LandingRoute>(
-                // Custom animation for landing screen (fade in)
                 enterTransition = {
-                    fadeIn(animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS))
+                    fadeIn(animationSpec = tween(300))
                 },
                 exitTransition = {
-                    fadeOut(animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS))
+                    fadeOut(animationSpec = tween(300))
                 }
             ) {
-                // TODO: Implement LandingScreen
-                LandingScreenPlaceholder(
-                    onNavigateToLogin = {
-                        navController.navigateToLogin()
-                    },
-                    onNavigateToRegister = {
+                LandingScreen(
+                    onGetStartedClick = {
                         navController.navigateToRegister()
+                    },
+                    onLoginClick = {
+                        navController.navigateToLogin()
                     }
                 )
             }
@@ -105,17 +105,15 @@ fun NoteMarkNavigationGraph(
             composable<LoginRoute> { backStackEntry ->
                 val loginRoute = backStackEntry.toRoute<LoginRoute>()
 
-                // TODO: Implement LoginScreen
-                LoginScreenPlaceholder(
-                    fromRegister = loginRoute.fromRegister,
-                    prefillEmail = loginRoute.prefillEmail,
-                    onNavigateToRegister = {
-                        navController.switchToRegister()
-                    },
-                    onNavigateToMain = {
+                LoginScreen(
+                    onLoginClick = { email, password ->
+                        // TODO: Handle API login call
                         navController.navigateToMain(clearAuthStack = true)
                     },
-                    onNavigateBack = {
+                    onSignUpClick = {
+                        navController.switchToRegister()
+                    },
+                    onBackClick = {
                         navController.navigateBackOrToLanding()
                     }
                 )
@@ -125,7 +123,6 @@ fun NoteMarkNavigationGraph(
             composable<RegisterRoute> { backStackEntry ->
                 val registerRoute = backStackEntry.toRoute<RegisterRoute>()
 
-                // TODO: Implement RegisterScreen
                 RegisterScreenPlaceholder(
                     fromLogin = registerRoute.fromLogin,
                     onNavigateToLogin = { email ->
@@ -145,17 +142,15 @@ fun NoteMarkNavigationGraph(
         navigation<MainGraph>(
             startDestination = HomeRoute
         ) {
-            // Home Screen - Main app entry point
+            // Home Screen
             composable<HomeRoute>(
-                // Special animation for entering main app
                 enterTransition = {
                     slideIntoContainer(
                         towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                        animationSpec = tween(NavigationConstants.TRANSITION_DURATION_MS)
+                        animationSpec = tween(300)
                     )
                 }
             ) {
-                // Placeholder for now - will be implemented in future milestones
                 HomeScreen(
                     onNavigateToProfile = {
                         navController.navigateToProfile()
@@ -170,7 +165,6 @@ fun NoteMarkNavigationGraph(
             composable<ProfileRoute> { backStackEntry ->
                 val profileRoute = backStackEntry.toRoute<ProfileRoute>()
 
-                // Placeholder for now - will be implemented in future milestones
                 ProfileScreen(
                     userId = profileRoute.userId,
                     onNavigateBack = {
@@ -184,6 +178,7 @@ fun NoteMarkNavigationGraph(
         }
     }
 }
+
 
 /**
  * Placeholder screens (to be replaced with actual implementations)

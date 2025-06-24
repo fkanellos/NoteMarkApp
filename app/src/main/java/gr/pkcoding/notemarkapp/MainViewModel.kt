@@ -2,14 +2,12 @@ package gr.pkcoding.notemarkapp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
+class MainViewModel : ViewModel() {
 
     private val _isAuthenticated = MutableStateFlow(false)
     val isAuthenticated = _isAuthenticated.asStateFlow()
@@ -23,6 +21,9 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     private fun checkAuthenticationStatus() {
         viewModelScope.launch {
+            // Simulate splash screen delay
+            delay(2000L) // 2 seconds
+
             // TODO: Check if user has valid tokens in local storage
             // For now, assume not authenticated
             _isAuthenticated.value = false

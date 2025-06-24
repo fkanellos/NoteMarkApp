@@ -1,4 +1,4 @@
-package gr.pkcoding.notemarkapp.adaptive
+package gr.pkcoding.notemarkapp.ui.adaptive
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -6,6 +6,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import gr.pkcoding.notemarkapp.adaptive.WindowInfo
+import gr.pkcoding.notemarkapp.adaptive.rememberWindowInfo
 
 /**
  * Generic adaptive value selector

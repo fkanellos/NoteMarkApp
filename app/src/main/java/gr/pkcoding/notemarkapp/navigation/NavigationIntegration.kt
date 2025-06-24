@@ -13,7 +13,6 @@ import gr.pkcoding.notemarkapp.navigation.navigateToLanding
 import gr.pkcoding.notemarkapp.navigation.navigateToLogin
 import gr.pkcoding.notemarkapp.navigation.navigateToMain
 import gr.pkcoding.notemarkapp.navigation.navigateToRegister
-import gr.pkcoding.notemarkapp.navigation.restartApp
 import kotlinx.coroutines.flow.Flow
 
 /**
