@@ -9,4 +9,5 @@
         <item name="splashScreenIconSize">240dp</item>
         <item name="postSplashScreenTheme">@style/Theme.NoteMarkApp</item>
     </style>
+
 </resources>

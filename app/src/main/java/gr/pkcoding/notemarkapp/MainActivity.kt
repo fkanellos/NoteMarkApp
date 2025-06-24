@@ -4,16 +4,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 import gr.pkcoding.notemarkapp.ui.theme.NoteMarkAppTheme
 import io.ktor.client.HttpClient
+import gr.pkcoding.notemarkapp.features.auth.ui.landing.LandingScreen
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -24,12 +24,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // NO SPLASH SCREEN FOR NOW - we'll fix it later
-        // The issue is in the splash_screen_view layout XML
+        enableEdgeToEdge()
 
         Log.d("MainActivity", "HttpClient injected: ${httpClient.javaClass.simpleName}")
-        Log.d("MainActivity", "Hilt setup working perfectly! 🚀")
+        Log.d("MainActivity", "Ready for UI development! 🚀")
 
         setContent {
             NoteMarkAppTheme {
@@ -37,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("NoteMark with Hilt! 🚀\n\nNetwork module ready!\nReady for Authentication!")
+                    NoteMarkApp()
                 }
             }
         }
@@ -45,17 +43,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NoteMarkAppTheme {
-        Greeting("Android")
-    }
+fun NoteMarkApp() {
+    // Εδώ θα μπει το navigation με τα UI screens
+    // Προς το παρόν δείχνουμε το Landing Screen
+    LandingScreen()
 }

@@ -37,8 +37,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -90,12 +92,6 @@ dependencies {
     // Security
     implementation(libs.security.crypto)
 
-    // Project modules
-    implementation(project(":core:common"))
-    implementation(project(":core:design"))
-    implementation(project(":core:network"))
-    implementation(project(":core:database"))
-    implementation(project(":feature:auth"))
 
     // Testing
     testImplementation(libs.junit)
