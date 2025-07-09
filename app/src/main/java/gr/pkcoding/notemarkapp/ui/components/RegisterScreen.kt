@@ -1,4 +1,4 @@
-package gr.pkcoding.notemarkapp.ui.components
+package gr.pkcoding.notemarkapp.features.auth.ui.register
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,16 +25,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -42,7 +36,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import gr.pkcoding.notemarkapp.R
 import gr.pkcoding.notemarkapp.ui.adaptive.AdaptiveText
 import gr.pkcoding.notemarkapp.ui.adaptive.MaterialTextStyle
@@ -50,65 +46,53 @@ import gr.pkcoding.notemarkapp.ui.adaptive.adaptiveValue
 import gr.pkcoding.notemarkapp.ui.theme.BlueBase
 import gr.pkcoding.notemarkapp.ui.theme.LightBlue
 import gr.pkcoding.notemarkapp.ui.theme.SurfaceLowest
+import gr.pkcoding.notemarkapp.ui.theme.NoteMarkAppTheme
+import gr.pkcoding.notemarkapp.features.auth.ui.viewmodel.AuthViewModel
+import gr.pkcoding.notemarkapp.features.auth.ui.viewmodel.RegisterFormData
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthIntent
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthState
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthFields
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthEffect
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.isLoading
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: (username: String, email: String, password: String, confirmPassword: String) -> Unit = { _, _, _, _ -> },
     onSignInClick: () -> Unit = {},
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onRegisterSuccess: () -> Unit = {},
+    onShowSnackbar: (message: String, isError: Boolean) -> Unit = { _, _ -> },
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    // State management
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+    // Collect states
+    val state by viewModel.state.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var isConfirmPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
+    // Get current form data
+    val formData = viewModel.getRegisterFormData()
 
-    // Focus states for showing supporting text
-    var usernameFocused by remember { mutableStateOf(false) }
-    var passwordFocused by remember { mutableStateOf(false) }
-
-    // Error states
-    var usernameError by remember { mutableStateOf<String?>(null) }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
-    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
-
-    // Validation functions
-    fun validateUsername(value: String): String? {
-        return when {
-            value.length < 3 -> "Username must be at least 3 characters."
-            value.length > 20 -> "Username can't be longer than 20 characters."
-            else -> null
+    // Handle effects (navigation, snackbars, etc.)
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collectLatest { effect ->
+            when (effect) {
+                is AuthEffect.NavigateToMain -> {
+                    onRegisterSuccess()
+                }
+                is AuthEffect.NavigateToLogin -> {
+                    onSignInClick()
+                }
+                is AuthEffect.ShowSnackbar -> {
+                    onShowSnackbar(effect.message, effect.isError)
+                }
+                is AuthEffect.ShowSuccessMessage -> {
+                    onShowSnackbar(effect.message, false)
+                }
+                else -> {
+                    // Handle other effects if needed
+                }
+            }
         }
     }
-
-    fun validateEmail(value: String): String? {
-        return if (!android.util.Patterns.EMAIL_ADDRESS.matcher(value).matches()) {
-            "Invalid email provided"
-        } else null
-    }
-
-    fun validatePassword(value: String): String? {
-        val hasNumberOrSymbol = value.any { it.isDigit() || !it.isLetterOrDigit() }
-        return if (value.length < 8 || !hasNumberOrSymbol) {
-            "Password must be at least 8 characters and include a number or symbol."
-        } else null
-    }
-
-    fun validateConfirmPassword(password: String, confirm: String): String? {
-        return if (password != confirm) "Passwords do not match" else null
-    }
-
-    // Validation check for button state
-    val isFormValid = username.length in 3..20 &&
-            android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-            password.length >= 8 &&
-            password.any { it.isDigit() || !it.isLetterOrDigit() } &&
-            password == confirmPassword
 
     // Light blue background
     Box(
@@ -136,62 +120,45 @@ fun RegisterScreen(
 
             // Input Fields Section
             RegisterInputFields(
-                username = username,
-                onUsernameChange = {
-                    username = it
-                    usernameError = if (!usernameFocused && it.isNotEmpty()) validateUsername(it) else null
+                formData = formData,
+                uiState = uiState,
+                onFieldChange = { field, value ->
+                    viewModel.processIntent(AuthIntent.UpdateField(field, value))
                 },
-                usernameFocused = usernameFocused,
-                onUsernameFocusChange = { usernameFocused = it },
-                usernameError = usernameError,
-
-                email = email,
-                onEmailChange = {
-                    email = it
-                    emailError = if (it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()) {
-                        validateEmail(it)
-                    } else null
+                onPasswordVisibilityToggle = { field ->
+                    viewModel.processIntent(AuthIntent.TogglePasswordVisibility(field))
                 },
-                emailError = emailError,
-
-                password = password,
-                onPasswordChange = {
-                    password = it
-                    passwordError = if (it.isNotEmpty()) validatePassword(it) else null
-                    confirmPasswordError = if (confirmPassword.isNotEmpty()) validateConfirmPassword(it, confirmPassword) else null
-                },
-                isPasswordVisible = isPasswordVisible,
-                onPasswordVisibilityToggle = { isPasswordVisible = !isPasswordVisible },
-                passwordFocused = passwordFocused,
-                onPasswordFocusChange = { passwordFocused = it },
-                passwordError = passwordError,
-
-                confirmPassword = confirmPassword,
-                onConfirmPasswordChange = {
-                    confirmPassword = it
-                    confirmPasswordError = if (it.isNotEmpty()) validateConfirmPassword(password, it) else null
-                },
-                isConfirmPasswordVisible = isConfirmPasswordVisible,
-                onConfirmPasswordVisibilityToggle = { isConfirmPasswordVisible = !isConfirmPasswordVisible },
-                confirmPasswordError = confirmPasswordError
+                onFieldFocusChange = { field, hasFocus ->
+                    viewModel.onFieldFocusChanged(field, hasFocus)
+                }
             )
 
             Spacer(modifier = Modifier.height(adaptiveValue(32.dp, 40.dp, 48.dp)))
 
             // Register Button
             RegisterButton(
-                enabled = isFormValid && !isLoading,
-                isLoading = isLoading,
+                enabled = isFormValid(formData) && uiState.fieldsEnabled,
+                isLoading = state.isLoading,
                 onClick = {
-                    isLoading = true
-                    onRegisterClick(username, email, password, confirmPassword)
+                    viewModel.processIntent(
+                        AuthIntent.Register(
+                            username = formData.username,
+                            email = formData.email,
+                            password = formData.password,
+                            confirmPassword = formData.confirmPassword
+                        )
+                    )
                 }
             )
 
             Spacer(modifier = Modifier.height(adaptiveValue(24.dp, 28.dp, 32.dp)))
 
             // Sign In Link
-            SignInLink(onClick = onSignInClick)
+            SignInLink(
+                onClick = {
+                    viewModel.processIntent(AuthIntent.NavigateToLogin)
+                }
+            )
         }
     }
 }
@@ -220,29 +187,11 @@ private fun RegisterHeader() {
 
 @Composable
 private fun RegisterInputFields(
-    username: String,
-    onUsernameChange: (String) -> Unit,
-    usernameFocused: Boolean,
-    onUsernameFocusChange: (Boolean) -> Unit,
-    usernameError: String?,
-
-    email: String,
-    onEmailChange: (String) -> Unit,
-    emailError: String?,
-
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    isPasswordVisible: Boolean,
-    onPasswordVisibilityToggle: () -> Unit,
-    passwordFocused: Boolean,
-    onPasswordFocusChange: (Boolean) -> Unit,
-    passwordError: String?,
-
-    confirmPassword: String,
-    onConfirmPasswordChange: (String) -> Unit,
-    isConfirmPasswordVisible: Boolean,
-    onConfirmPasswordVisibilityToggle: () -> Unit,
-    confirmPasswordError: String?
+    formData: RegisterFormData,
+    uiState: gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthUiState,
+    onFieldChange: (String, String) -> Unit,
+    onPasswordVisibilityToggle: (String) -> Unit,
+    onFieldFocusChange: (String, Boolean) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(adaptiveValue(20.dp, 24.dp, 28.dp))
@@ -250,40 +199,48 @@ private fun RegisterInputFields(
         // Username Field
         InputFieldWithValidation(
             label = "Username",
-            value = username,
-            onValueChange = onUsernameChange,
+            value = formData.username,
+            onValueChange = { onFieldChange(AuthFields.USERNAME, it) },
             placeholder = "John.doe",
-            supportingText = if (usernameFocused) "Use between 3 and 20 characters for your username." else null,
-            errorText = usernameError,
-            onFocusChange = onUsernameFocusChange,
+            supportingText = if (uiState.focusedField == AuthFields.USERNAME)
+                "Use between 3 and 20 characters for your username." else null,
+            errorText = uiState.getFieldError(AuthFields.USERNAME),
+            onFocusChange = { hasFocus -> onFieldFocusChange(AuthFields.USERNAME, hasFocus) },
+            enabled = uiState.fieldsEnabled,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         // Email Field
         InputFieldWithValidation(
             label = "Email",
-            value = email,
-            onValueChange = onEmailChange,
+            value = formData.email,
+            onValueChange = { onFieldChange(AuthFields.EMAIL, it) },
             placeholder = "john.doe@example.com",
-            errorText = emailError,
+            errorText = uiState.getFieldError(AuthFields.EMAIL),
+            onFocusChange = { hasFocus -> onFieldFocusChange(AuthFields.EMAIL, hasFocus) },
+            enabled = uiState.fieldsEnabled,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
 
         // Password Field
         InputFieldWithValidation(
             label = "Password",
-            value = password,
-            onValueChange = onPasswordChange,
+            value = formData.password,
+            onValueChange = { onFieldChange(AuthFields.PASSWORD, it) },
             placeholder = "Password",
-            supportingText = if (passwordFocused) "Use 8+ characters with a number or symbol for better security." else null,
-            errorText = passwordError,
-            onFocusChange = onPasswordFocusChange,
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            supportingText = if (uiState.focusedField == AuthFields.PASSWORD)
+                "Use 8+ characters with a number or symbol for better security." else null,
+            errorText = uiState.getFieldError(AuthFields.PASSWORD),
+            onFocusChange = { hasFocus -> onFieldFocusChange(AuthFields.PASSWORD, hasFocus) },
+            enabled = uiState.fieldsEnabled,
+            visualTransformation = if (uiState.isPasswordVisible(AuthFields.PASSWORD))
+                VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = onPasswordVisibilityToggle) {
+                IconButton(onClick = { onPasswordVisibilityToggle(AuthFields.PASSWORD) }) {
                     Icon(
                         painter = painterResource(R.drawable.eye_icon),
-                        contentDescription = if (isPasswordVisible) "Hide password" else "Show password"
+                        contentDescription = if (uiState.isPasswordVisible(AuthFields.PASSWORD))
+                            "Hide password" else "Show password"
                     )
                 }
             },
@@ -293,16 +250,20 @@ private fun RegisterInputFields(
         // Confirm Password Field
         InputFieldWithValidation(
             label = "Repeat password",
-            value = confirmPassword,
-            onValueChange = onConfirmPasswordChange,
+            value = formData.confirmPassword,
+            onValueChange = { onFieldChange(AuthFields.CONFIRM_PASSWORD, it) },
             placeholder = "Password",
-            errorText = confirmPasswordError,
-            visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            errorText = uiState.getFieldError(AuthFields.CONFIRM_PASSWORD),
+            onFocusChange = { hasFocus -> onFieldFocusChange(AuthFields.CONFIRM_PASSWORD, hasFocus) },
+            enabled = uiState.fieldsEnabled,
+            visualTransformation = if (uiState.isPasswordVisible(AuthFields.CONFIRM_PASSWORD))
+                VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = onConfirmPasswordVisibilityToggle) {
+                IconButton(onClick = { onPasswordVisibilityToggle(AuthFields.CONFIRM_PASSWORD) }) {
                     Icon(
                         painter = painterResource(R.drawable.eye_icon),
-                        contentDescription = if (isConfirmPasswordVisible) "Hide password" else "Show password"
+                        contentDescription = if (uiState.isPasswordVisible(AuthFields.CONFIRM_PASSWORD))
+                            "Hide password" else "Show password"
                     )
                 }
             },
@@ -321,12 +282,12 @@ private fun InputFieldWithValidation(
     supportingText: String? = null,
     errorText: String? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
+    enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     val isError = errorText != null
-    val focusRequester = remember { FocusRequester() }
 
     Column(modifier = modifier) {
         AdaptiveText(
@@ -349,7 +310,6 @@ private fun InputFieldWithValidation(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     onFocusChange?.invoke(focusState.isFocused)
                 },
@@ -357,6 +317,7 @@ private fun InputFieldWithValidation(
             trailingIcon = trailingIcon,
             keyboardOptions = keyboardOptions,
             singleLine = true,
+            enabled = enabled,
             isError = isError,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = if (isError) MaterialTheme.colorScheme.error else Color.Transparent,
@@ -366,7 +327,8 @@ private fun InputFieldWithValidation(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 cursorColor = if (isError) MaterialTheme.colorScheme.error else BlueBase,
-                errorCursorColor = MaterialTheme.colorScheme.error
+                errorCursorColor = MaterialTheme.colorScheme.error,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             ),
             shape = RoundedCornerShape(8.dp)
         )
@@ -391,7 +353,7 @@ private fun RegisterButton(
 ) {
     Button(
         onClick = onClick,
-        enabled = enabled,
+        enabled = enabled && !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .height(adaptiveValue(48.dp, 56.dp, 64.dp)),
@@ -434,5 +396,24 @@ private fun SignInLink(
                 color = BlueBase
             )
         }
+    }
+}
+
+/**
+ * Form validation logic
+ */
+private fun isFormValid(formData: RegisterFormData): Boolean {
+    return formData.username.length in 3..20 &&
+            android.util.Patterns.EMAIL_ADDRESS.matcher(formData.email).matches() &&
+            formData.password.length >= 8 &&
+            formData.password.any { it.isDigit() || !it.isLetterOrDigit() } &&
+            formData.password == formData.confirmPassword
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegisterScreenPreview() {
+    NoteMarkAppTheme {
+        RegisterScreen()
     }
 }

@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import gr.pkcoding.notemarkapp.R
 import gr.pkcoding.notemarkapp.ui.adaptive.adaptiveValue
 import gr.pkcoding.notemarkapp.adaptive.rememberWindowInfo
@@ -25,13 +29,49 @@ import gr.pkcoding.notemarkapp.ui.theme.BlueBase
 import gr.pkcoding.notemarkapp.ui.theme.LightBlue
 import gr.pkcoding.notemarkapp.ui.theme.NoteMarkAppTheme
 import gr.pkcoding.notemarkapp.ui.theme.SurfaceLowest
+import gr.pkcoding.notemarkapp.features.auth.ui.viewmodel.AuthViewModel
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthIntent
+import gr.pkcoding.notemarkapp.feature.auth.presentation.model.AuthEffect
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun LandingScreen(
-    onGetStartedClick: () -> Unit = {},
-    onLoginClick: () -> Unit = {}
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToMain: () -> Unit = {},
+    onShowSnackbar: (message: String, isError: Boolean) -> Unit = { _, _ -> },
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     val windowInfo = rememberWindowInfo()
+
+    // Collect states
+    val state by viewModel.state.collectAsState()
+
+    // Handle effects (navigation, snackbars, etc.)
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collectLatest { effect ->
+            when (effect) {
+                is AuthEffect.NavigateToMain -> {
+                    onNavigateToMain()
+                }
+                is AuthEffect.NavigateToLogin -> {
+                    onNavigateToLogin()
+                }
+                is AuthEffect.NavigateToRegister -> {
+                    onNavigateToRegister()
+                }
+                is AuthEffect.ShowSnackbar -> {
+                    onShowSnackbar(effect.message, effect.isError)
+                }
+                is AuthEffect.ShowSuccessMessage -> {
+                    onShowSnackbar(effect.message, false)
+                }
+                else -> {
+                    // Handle other effects if needed
+                }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -40,13 +80,21 @@ fun LandingScreen(
     ) {
         if (windowInfo.isLandscape) {
             LandingScreenLandscape(
-                onGetStartedClick = onGetStartedClick,
-                onLoginClick = onLoginClick
+                onGetStartedClick = {
+                    viewModel.processIntent(AuthIntent.NavigateToRegister)
+                },
+                onLoginClick = {
+                    viewModel.processIntent(AuthIntent.NavigateToLogin)
+                }
             )
         } else {
             LandingScreenPortrait(
-                onGetStartedClick = onGetStartedClick,
-                onLoginClick = onLoginClick
+                onGetStartedClick = {
+                    viewModel.processIntent(AuthIntent.NavigateToRegister)
+                },
+                onLoginClick = {
+                    viewModel.processIntent(AuthIntent.NavigateToLogin)
+                }
             )
         }
     }
@@ -106,14 +154,12 @@ private fun LandingGraphic() {
     val windowInfo = rememberWindowInfo()
 
     if (windowInfo.isLandscape) {
-
         Image(
             painter = painterResource(id = R.drawable.landing_graphic),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1.0f)
-            ,
+                .aspectRatio(1.0f),
             contentScale = ContentScale.Crop
         )
     } else {
